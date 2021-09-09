@@ -9,16 +9,11 @@ f.close()
 
 #username = input("Enter username here\n")
 
-regex_run = [
-    "(\d{2}/\d{2}/\d{4})(?:.*\n){1}(\S*) \((\d+\.\d*\D%)",
-    "(\d{2}/\d{2}/\d{4})(?:.*\n){2}(\S*) \((\d+\.\d*\D%)",
-    "(\d{2}/\d{2}/\d{4})(?:.*\n){3}(\S*) \((\d+\.\d*\D%)",
-    "(\d{2}/\d{2}/\d{4})(?:.*\n){4}(\S*) \((\d+\.\d*\D%)"
-    ]
-
 results = []
-for regex in regex_run:
-    results.extend(re.findall(regex, txt))
+for i in range(1,5):
+    print(i)
+    results.extend(re.findall("(\d{2}/\d{2}/\d{4})(?:.*\n){" + str(i) + "}(\S*) \((\d+\.\d*\D%)", txt))
+
 
 df = pd.DataFrame(results, columns=["Date", "Username", "EB"])
 
