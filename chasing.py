@@ -13,13 +13,14 @@ f.close()
 
 results = []
 for i in range(1,5):
-    results.extend(re.findall("((?:\d{2}/){2}\d{4})(?:.*\n){" + str(i) + "}(\S*) \((\S*%)", txt))
+    results.extend(re.findall("((?:\d{2}/){2}\d{4})(?:.*\n){" + str(i) + "}(\S+) \((\S+%)", txt))
 
 
 # creating pandas dataframe and drop duplicates
 
 df_raw = pd.DataFrame(results, columns=["Date", "Username", "EB"])
 df = df_raw.drop_duplicates()
+
 
 # pulling data and creating conversion dictionary 
 
@@ -50,22 +51,37 @@ def Role(EB):
     return role
 
 df['EB_long (%)'] = df.apply(lambda row: EB_long(row.EB), axis = 1)
-df['Role'] = df.apply(lambda row: Role(row.EB), axis = 1)
+#df['Role'] = df.apply(lambda row: Role(row.EB), axis = 1)
 
 
-# convert dates to readable date values, ordering by EB
+# convert dates to readable date values, ordering by Username, Date then EB
 
 df['Date'] = pd.to_datetime(df.Date, dayfirst=True)
-df = df.sort_values(by="EB_long (%)")
+df = df.sort_values(["Username","Date","EB_long (%)"]).reset_index()
+
+
+df_user = df.drop(columns=["index", "EB"]).drop_duplicates(subset=['Date', 'Username'], keep='last')
+print(df_user)
+
+df_user = df_user.pivot(index="Date", columns="Username", values="EB_long (%)")
+
+
 
 # write to csv
 
 df.to_csv("data.csv")
-
+df_user.to_csv("Users.csv")
 
 # plot?
 
+#df_user.plot()
+#plt.show()
 
-print(df[(df['Username'] == "DrunkenPangolin")])
 
+#df[(df['Username'] == "DrunkenPangolin")].plot()
+#plt.show()
 
+username = input()
+
+df_user.plot(y = username)
+plt.show()
