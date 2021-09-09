@@ -4,21 +4,22 @@ import numpy as np
 import pandas as pd
 import re
 
+
 # pulling data from file
 
 f = open("/home/sam/Coding/discord_chasing_values/chasing_raw.txt", "r")
-txt = f.read()
+txt = f.read().replace("ApatheticEconomist","Syllean")
 f.close()
 
 results = []
 for i in range(1,5):
-    results.extend(re.findall("(\d{2}/\d{2}/\d{4})(?:.*\n){" + str(i) + "}(\S*) \((\d+\.\d*\D%)", txt))
+    results.extend(re.findall("((?:\d{2}/){2}\d{4})(?:.*\n){" + str(i) + "}(\S*) \((\S*%)", txt))
 
 
-# creating pandas dataframe
+# creating pandas dataframe and drop duplicates
 
-df = pd.DataFrame(results, columns=["Date", "Username", "EB"])
-
+df_raw = pd.DataFrame(results, columns=["Date", "Username", "EB"])
+df = df_raw.drop_duplicates()
 
 # pulling data and creating conversion dictionary 
 
@@ -26,7 +27,7 @@ f = open("/home/sam/Coding/discord_chasing_values/conversion_table.txt", "r")
 con_table_raw = f.read()
 f.close()
 
-con_table = str(con_table_raw.replace("\n",",").replace("\t",",")).split(",")
+con_table = str(con_table_raw.replace("\n","\t")).split("\t")
 
 conversion_dict = {}
 for i in range(1, len(con_table), 2):
@@ -39,8 +40,8 @@ for i in range(1, len(con_table), 2):
 # adding extra columns to dataframe
 
 def EB_long(EB):
-    oom = re.findall("\d(\D)+%",EB)[0]
-    eb_long = float(re.findall("^\d+.\d+",EB)[0])*(10**conversion_dict[oom])
+    oom = re.findall("\d(\D+)%",EB)[0]
+    eb_long = float(re.findall("[\d\.]+",EB)[0])*(10**conversion_dict[oom])
     return eb_long
 
 def Role(EB):
@@ -52,17 +53,19 @@ df['EB_long (%)'] = df.apply(lambda row: EB_long(row.EB), axis = 1)
 df['Role'] = df.apply(lambda row: Role(row.EB), axis = 1)
 
 
-# convert dates to readable date values, ordering by date
+# convert dates to readable date values, ordering by EB
 
 df['Date'] = pd.to_datetime(df.Date, dayfirst=True)
 df = df.sort_values(by="EB_long (%)")
-
 
 # write to csv
 
 df.to_csv("data.csv")
 
 
-plt.df[(df['Username'] == "DrunkenPangolin")]
+# plot?
+
+
+print(df[(df['Username'] == "DrunkenPangolin")])
 
 
