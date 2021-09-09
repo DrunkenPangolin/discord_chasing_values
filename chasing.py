@@ -7,10 +7,18 @@ f = open("/home/sam/Coding/discord_chasing_values/chasing_raw.txt", "r")
 txt = f.read()
 f.close()
 
-username = input("Enter username here\n")
+#username = input("Enter username here\n")
 
-regex = "(\d{2}/\d{2}/\d{4})[\s.]*(.*) \((\d+\.\d*\D%)"
-results = re.findall(regex, txt)
+regex_run = [
+    "(\d{2}/\d{2}/\d{4})(?:.*\n){1}(\S*) \((\d+\.\d*\D%)",
+    "(\d{2}/\d{2}/\d{4})(?:.*\n){2}(\S*) \((\d+\.\d*\D%)",
+    "(\d{2}/\d{2}/\d{4})(?:.*\n){3}(\S*) \((\d+\.\d*\D%)",
+    "(\d{2}/\d{2}/\d{4})(?:.*\n){4}(\S*) \((\d+\.\d*\D%)"
+    ]
+
+results = []
+for regex in regex_run:
+    results.extend(re.findall(regex, txt))
 
 df = pd.DataFrame(results, columns=["Date", "Username", "EB"])
 
@@ -47,5 +55,10 @@ df['EB_long (%)'] = df.apply(lambda row: EB_long(row.EB), axis = 1)
 
 df['Role'] = df.apply(lambda row: role(row.EB), axis = 1)
 
-df.to_csv("test.csv")
-#print(df[(df['Username'] == username)])
+df['Date'] = pd.to_datetime(df.Date, dayfirst=True)
+
+df.to_csv("data.csv")
+df = df.sort_values(by="EB_long (%)")
+
+
+print(df[(df['Username'] == "DrunkenPangolin")])
