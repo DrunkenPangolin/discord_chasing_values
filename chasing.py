@@ -14,7 +14,6 @@ for i in range(1,5):
     print(i)
     results.extend(re.findall("(\d{2}/\d{2}/\d{4})(?:.*\n){" + str(i) + "}(\S*) \((\d+\.\d*\D%)", txt))
 
-
 df = pd.DataFrame(results, columns=["Date", "Username", "EB"])
 
 f = open("/home/sam/Coding/discord_chasing_values/conversion_table.txt", "r")
@@ -37,13 +36,7 @@ def EB_long(EB):
 
 def role(EB):
     oom = int(math.log10(EB_long(EB)/100))
-    role = conversion_dict[oom - oom % 3] + "farmer "
-    if oom % 3 == 0:
-        role += "1"
-    elif oom % 3 == 1:
-        role += "2"
-    elif oom % 3 == 2:
-        role += "3"
+    role = conversion_dict[oom - oom % 3] + "farmer " + str(oom % 3 + 1)
     return role
 
 df['EB_long (%)'] = df.apply(lambda row: EB_long(row.EB), axis = 1)
@@ -52,8 +45,8 @@ df['Role'] = df.apply(lambda row: role(row.EB), axis = 1)
 
 df['Date'] = pd.to_datetime(df.Date, dayfirst=True)
 
-df.to_csv("data.csv")
 df = df.sort_values(by="EB_long (%)")
+df.to_csv("data.csv")
 
 
 print(df[(df['Username'] == "DrunkenPangolin")])
