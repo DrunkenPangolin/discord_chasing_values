@@ -37,7 +37,6 @@ def data_scrape():
 
     return df, conversion_dict
 
-
 def main():
     # adding extra columns to dataframe
 
@@ -73,12 +72,11 @@ def main():
 
     # write to csv
     df.to_csv("data.csv")
-    df_user.to_csv("Users.csv")
+    df_user.to_csv("users.csv")
 
     # create list of Usernames
     users = pd.DataFrame({"Username": df.Username.unique()}).values.tolist()
     return users, df_user, df
-
 
 def graph_all():
     [users, df_user, df] = main()
@@ -92,27 +90,45 @@ def graph_all():
     plt.show()
     return ax
 
-
 def graph_increase():
     [users, df_user, df] = main()
 
-    # create new df from increases
-    increase = pd.DataFrame(index=df_user.index)
+    # filter off dates before start of group
+    res = df_user.loc['2021-02-15':]
+
+    # new dataframe
+    df_increase = pd.DataFrame(index=res.index)
+
+    def increase(EB):
+        min = res.min()[user]
+        new_eb = EB / min
+        return new_eb
+    
     for user in users:
-        increase[user] = df_user.apply(
-            lambda row: df_user[user] / df_user.min()[user], axis=1
-        )
-    ax = increase[users[0]].dropna().plot()
+        df_increase[user] = res.apply(lambda row: increase(row[user]), axis=1)
+
+    # define graph and add lines
+    ax = df_increase[users[0]].dropna().plot()
     for user in users:
-        print(user)
         if user == users[0]:
             continue
-        increase[user].dropna().plot(ax=ax)
+        df_increase[user].dropna().plot(ax=ax)
     plt.show()
-    return ax
 
+    df_increase.to_csv("increase.csv")
+    return ax, df_increase
 
-user = "DrunkenPangolin"
-[users, df_user, df] = main()
-df_user.apply(lambda row: df_user[user] / df_user.min()[user], axis=1)
-print(df_user[(df_user[username])])
+def top5():
+    [users, df_user, df] = main()
+    [ax, df_increase] = graph_increase()
+
+    top5 = []
+
+    for user in users:
+        # check if max value is more than list min
+        # add to list w/ user
+        # sort
+        # del smallest
+        return
+
+graph_increase()
