@@ -39,7 +39,6 @@ def data_scrape():
 
 def main():
     # adding extra columns to dataframe
-
     def EB_long(EB):
         oom = re.findall("\d(\D+)%", EB)[0]
         eb_long = float(re.findall("[\d\.]+", EB)[0]) * (10 ** conversion_dict[oom])
@@ -70,28 +69,8 @@ def main():
     # pivot Usernames into columns
     df_user = df_user.pivot(index="Date", columns="Username", values="EB_long (%)")
 
-    # write to csv
-    df.to_csv("data.csv")
-    df_user.to_csv("users.csv")
-
     # create list of Usernames
     users = pd.DataFrame({"Username": df.Username.unique()}).values.tolist()
-    return users, df_user, df
-
-def graph_all():
-    [users, df_user, df] = main()
-
-    # define graph and add lines
-    ax = df_user[users[0]].dropna().plot()
-    for user in users:
-        if user == users[0]:
-            continue
-        df_user[user].dropna().plot(ax=ax)
-    plt.show()
-    return ax
-
-def graph_increase():
-    [users, df_user, df] = main()
 
     # filter off dates before start of group
     res = df_user.loc['2021-02-15':]
@@ -107,6 +86,28 @@ def graph_increase():
     for user in users:
         df_increase[user] = res.apply(lambda row: increase(row[user]), axis=1)
 
+    # write to csv
+    df.to_csv("data.csv")
+    df_user.to_csv("users.csv")
+    df_increase.to_csv("increase.csv")
+
+    return users, df_user, df_increase
+
+def graph_all():
+    [users, df_user, df_increase] = main()
+
+    # define graph and add lines
+    ax = df_user[users[0]].dropna().plot()
+    for user in users:
+        if user == users[0]:
+            continue
+        df_user[user].dropna().plot(ax=ax)
+    plt.show()
+    return ax
+
+def graph_increase():
+    [users, df_user, df_increase] = main()
+
     # define graph and add lines
     ax = df_increase[users[0]].dropna().plot()
     for user in users:
@@ -115,8 +116,7 @@ def graph_increase():
         df_increase[user].dropna().plot(ax=ax)
     plt.show()
 
-    df_increase.to_csv("increase.csv")
-    return ax, df_increase
+    return ax
 
 def top5():
     [users, df_user, df] = main()
@@ -126,9 +126,16 @@ def top5():
 
     for user in users:
         # check if max value is more than list min
+        #if 
         # add to list w/ user
         # sort
         # del smallest
         return
 
-graph_increase()
+def test():
+    [users, df_user, df_increase] = main()
+
+    max_increase = df_increase.max()
+    print(max_increase)
+
+test()
