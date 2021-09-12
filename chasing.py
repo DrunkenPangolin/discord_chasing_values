@@ -87,9 +87,9 @@ def main():
         df_increase[user] = res.apply(lambda row: increase(row[user]), axis=1)
 
     # write to csv
-    df.to_csv("data.csv")
-    df_user.to_csv("users.csv")
-    df_increase.to_csv("increase.csv")
+    #df.to_csv("data.csv")
+    #df_user.to_csv("users.csv")
+    #df_increase.to_csv("increase.csv")
 
     return users, df_user, df_increase
 
@@ -119,13 +119,14 @@ def graph_increase():
     return ax
 
 def top5():
-    [users, df_user, df] = main()
-    [ax, df_increase] = graph_increase()
+    [users, df_user, df_increase] = main()
 
     top5 = []
 
     for user in users:
         # check if max value is more than list min
+        
+        
         #if 
         # add to list w/ user
         # sort
@@ -136,6 +137,6 @@ def test():
     [users, df_user, df_increase] = main()
 
     max_increase = df_increase.max()
-    print(max_increase)
+    print(max_increase["withee"])
 
 test()
