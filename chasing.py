@@ -3,12 +3,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import re
 
-
 def data_scrape():
+    # create inactive group
+    f = open("/home/sam/Coding/discord_chasing_values/inactive.csv", "r")
+    temp = f.readlines()
+    inactive = []
+    for name in temp:
+        inactive.append(name.split()[2])
+    f.close
+
     # pulling data from file
     f = open("/home/sam/Coding/discord_chasing_values/chasing_raw.txt", "r")
-    txt = f.read().replace("ApatheticEconomist", "Syllean")
-    f.close()
+    txt = f.read().replace("ApatheticEconomist", "Syllean").replace('66bakerzdozen66','Tashab9120').replace('HyperHC','i_Ferfs')
 
     results = []
     for i in range(1, 5):
@@ -18,9 +24,11 @@ def data_scrape():
             )
         )
 
-    # creating pandas dataframe and drop duplicates
+    # creating pandas dataframe and drop duplicates and inactive users
     df_raw = pd.DataFrame(results, columns=["Date", "Username", "EB"])
     df = df_raw.drop_duplicates()
+    for user in inactive:
+        df = df[df.Username != user]  
 
     # pulling data and creating conversion dictionary
     f = open("/home/sam/Coding/discord_chasing_values/conversion_table.txt", "r")
@@ -34,7 +42,6 @@ def data_scrape():
             conversion_dict[con_table[i]] = int(con_table[i - 1])
         except:
             conversion_dict[int(con_table[i])] = con_table[i - 1]
-
     return df, conversion_dict
 
 def main():
@@ -74,6 +81,7 @@ def main():
 
     # filter off dates before start of group
     res = df_user.loc['2021-02-15':]
+    df_user = res
 
     # new dataframe
     df_increase = pd.DataFrame(index=res.index)
@@ -87,9 +95,9 @@ def main():
         df_increase[user] = res.apply(lambda row: increase(row[user]), axis=1)
 
     # write to csv
-    #df.to_csv("data.csv")
-    #df_user.to_csv("users.csv")
-    #df_increase.to_csv("increase.csv")
+    df.to_csv("data.csv")
+    df_user.to_csv("users.csv")
+    df_increase.to_csv("increase.csv")
 
     return users, df_user, df_increase
 
@@ -102,6 +110,7 @@ def graph_all():
         if user == users[0]:
             continue
         df_user[user].dropna().plot(ax=ax)
+    plt.legend(bbox_to_anchor=(1.01,1.04), loc="upper left")
     plt.show()
     return ax
 
@@ -114,6 +123,7 @@ def graph_increase():
         if user == users[0]:
             continue
         df_increase[user].dropna().plot(ax=ax)
+    plt.legend(bbox_to_anchor=(1.01,1.04), loc="upper left")
     plt.show()
 
     return ax
@@ -136,7 +146,12 @@ def top5():
 def test():
     [users, df_user, df_increase] = main()
 
-    max_increase = df_increase.max()
-    print(max_increase["withee"])
+    # define graph and add lines
+    ax = df_user['DrunkenPangolin'].dropna().plot()
+    df_user['Lelands89'].dropna().plot(ax=ax)
+    plt.legend(bbox_to_anchor=(0.2,0.9), loc="upper right")
+    plt.show()
 
+data_scrape()
+main()
 test()
